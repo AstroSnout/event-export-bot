@@ -115,4 +115,4 @@ async def on_message(message):
         await message.author.send(file=discord.File(spreadsheet))
 
 
-bot.run('NDg1MDkwNTM4ODE1NzUwMTc1.DmrfgQ.nrPA_zao8CQUyjdbdSKhriuxvTg', bot=True, reconnect=True)
+bot.run(bot_token, bot=True, reconnect=True)
