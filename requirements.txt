@@ -1,7 +1,7 @@
 git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py[voice]
 sys
 traceback
-base64 as b64
+base64
 json
 datetime
 os
