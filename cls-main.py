@@ -3,7 +3,7 @@ from discord.ext import commands
 
 import sys
 import traceback
-import base64 as b64
+import base64
 import json
 import datetime
 import os
@@ -372,7 +372,7 @@ class EventExport(discord.ext.commands.Bot):
         # Decode the string
         async with message.channel.typing():
             try:
-                decoded_data = b64.b64decode(read_data)
+                decoded_data = base64.b64decode(read_data)
             except ValueError:
                 await message.author.send("Error:```UnicodeDecodeError: 'utf-8' codec can't decode the string provided```")
                 return
