@@ -68,8 +68,8 @@ invite_status = {
 
 
 
-BNET_API_KEY = '4f50adccbaad4636872eac30e7d5f4d5'
-BNET_API_SECRET = 'Bu3kf5npXVZhvvOYiL7rX9820q5jJ72d'
+BNET_API_KEY = os.environ["BNET_API_KEY"]
+BNET_API_SECRET = os.environ["BNET_API_SECRET"]
 
 access_token_grant = f'https://eu.battle.net/oauth/token?grant_type=client_credentials&client_id={BNET_API_KEY}&client_secret={BNET_API_SECRET}'
 
