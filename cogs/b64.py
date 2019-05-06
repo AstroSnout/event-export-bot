@@ -4,7 +4,7 @@ import ast
 import json
 
 
-class B64:
+class B64(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

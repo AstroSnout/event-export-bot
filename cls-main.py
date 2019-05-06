@@ -3,7 +3,7 @@ from discord.ext import commands
 
 import sys
 import traceback
-import base64
+import base64 as b64
 import json
 import datetime
 import os
@@ -66,16 +66,15 @@ invite_status = {
         9: 'Tentative'
     }
 
-
-
-BNET_API_KEY = os.environ["BNET_API_KEY"]
-BNET_API_SECRET = os.environ["BNET_API_SECRET"]
+BNET_API_KEY = os.environ['BNET_API_KEY']
+BNET_API_SECRET = os.environ['BNET_API_SECRET']
 
 access_token_grant = f'https://eu.battle.net/oauth/token?grant_type=client_credentials&client_id={BNET_API_KEY}&client_secret={BNET_API_SECRET}'
 
 bnet_token = json.loads(
     requests.get(access_token_grant).content
 )['access_token']
+
 
 async def get_json(uri, timeout=60):
     print('Requesting JSON ->', yarl.URL(uri))
@@ -87,6 +86,7 @@ async def get_json(uri, timeout=60):
 # ---------- Spreadsheet processor functions ----------
 # -----------------------------------------------------
 
+
 async def dt_0(data, message):
     event_title = data['eventInfo']['title']
     event_date = data['eventInfo']['eventDate']
@@ -95,7 +95,6 @@ async def dt_0(data, message):
     # Making of the spreadsheet
     for char in '\\/:*?<>|':
         event_title = event_title.replace(char, '-')
-    print(event_title)
     wb_name = f'{event_date} {event_title}.xlsx'
     wb = xlsxwriter.Workbook(wb_name, {'in_memory': True})
     ws = wb.add_worksheet()
@@ -115,14 +114,6 @@ async def dt_0(data, message):
     ws.write('C2', 'Invite Status', misc_cell)
     ws.write('D2', 'Equipped', misc_cell)
     ws.write('E2', 'Neck', misc_cell)
-
-    class_cell = wb.add_format(cell_format['Priest'])
-    invite_cell = wb.add_format(cell_format['Signed Up'])
-
-    ws.write('B3', 'TASIN FILIP', class_cell)
-    ws.write('C3', 'CONFIRM KO KUĆA', invite_cell)
-    ws.write('D3', '370-380', misc_cell)
-    ws.write('E3', 'Oko 31', misc_cell)
 
     # Populate the rows
     info = await message.author.send('Getting character data...')
@@ -155,11 +146,21 @@ async def dt_0(data, message):
             f'`[{"█" * (int(int(i) / len(data) * 25)) + "-" * (25 - int(int(i) / len(data) * 25))}]`'
         )
 
-        print(int(int(i) / len(data) * 10))
-
-        character_data = await get_json(
-            f'https://eu.api.blizzard.com/wow/character/{realm}/{char_name}?fields=items&locale=en_GB&access_token={bnet_token}'
-        )
+        try:
+            character_data = await get_json(
+                f'https://eu.api.blizzard.com/wow/character/{realm}/{char_name}?fields=items&locale=en_GB&access_token={bnet_token}'
+            )
+        except json.decoder.JSONDecodeError:
+            character_data ={
+                'items':{
+                    'averageItemLevelEquipped': '???',
+                    'neck': {
+                        'azeriteItem': {
+                            'azeriteLevel': '??'
+                        }
+                    }
+                }
+            }
 
         # Cell value set to character's name, cell style set to character's class (class color cell BG for now only)
         class_cell = wb.add_format(cell_format[class_name])
@@ -169,10 +170,10 @@ async def dt_0(data, message):
         char_hoa = character_data['items']['neck']['azeriteItem']['azeriteLevel']
         i = int(i)
 
-        ws.write(f'B{str(i + 3)}', char_name, class_cell)
-        ws.write(f'C{str(i + 3)}', inv_stat, invite_cell)
-        ws.write(f'D{str(i + 3)}', char_eq, misc_cell)
-        ws.write(f'E{str(i + 3)}', char_hoa, misc_cell)
+        ws.write(f'B{str(i + 2)}', char_name, class_cell)
+        ws.write(f'C{str(i + 2)}', inv_stat, invite_cell)
+        ws.write(f'D{str(i + 2)}', char_eq, misc_cell)
+        ws.write(f'E{str(i + 2)}', char_hoa, misc_cell)
 
         if inv_stat == "Signed Up" or inv_stat == "Confirmed":
             conf_count +=1
@@ -372,7 +373,7 @@ class EventExport(discord.ext.commands.Bot):
         # Decode the string
         async with message.channel.typing():
             try:
-                decoded_data = base64.b64decode(read_data)
+                decoded_data = b64.b64decode(read_data)
             except ValueError:
                 await message.author.send("Error:```UnicodeDecodeError: 'utf-8' codec can't decode the string provided```")
                 return
@@ -425,4 +426,4 @@ if __name__ == '__main__':
             print(f'Failed to load extension {extension}.', file=sys.stderr)
             traceback.print_exc()
 
-bot.run(os.environ["BOT_TOKEN"], bot=True, reconnect=True)
+bot.run(os.environ['BOT_TOKEN'], bot=True, reconnect=True)

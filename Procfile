@@ -1,1 +1,1 @@
-worker: python cls-main.py
+worker: python main.py
